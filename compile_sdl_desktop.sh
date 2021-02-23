@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $THIS_DIR
+BUILD_DIR=build_android
+WD=$(dirname "$(readlink -f "$0")")
+echo "change directory to $WD"
+cd $WD
 
 # Step 1: update submodule recursively
 git submodule update --init --recursive
@@ -14,10 +16,11 @@ if [ ! -d $build_dir ]; then
     mkdir $build_dir
 fi
 cd $build_dir
+rm * -rf
 cmake .. -DCMAKE_TOOLCHAIN_FILE=../external/hello_imgui/vcpkg/scripts/buildsystems/vcpkg.cmake -DHELLOIMGUI_USE_SDL_OPENGL3=ON
 
 # Step 4: build
-make -j 4
+make -j $(($(nproc)-1))
 
 # Step 5: run the app
 ./hello

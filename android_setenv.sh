@@ -1,13 +1,16 @@
 #! /bin/bash
-DEVTOOLS_DIR="$HOME/DevTools"
-JDK_ROOT_DIR="$DEVTOOLS_DIR/JDK"
-ANDROID_HOME="$DEVTOOLS_DIR/Android"
+
+echo "DEV_TOOLS=$DEV_TOOLS"
+DEV_TOOLS="${1-$HOME/DevTools}"
+echo "DEV_TOOLS=$DEV_TOOLS"
+#JDK_ROOT_DIR="$DEV_TOOLS/JDK"
+ANDROID_HOME="$DEV_TOOLS/Android"
 ANDROID_NDK_HOME="$ANDROID_HOME/ndk-bundle"
 android_toolchain_file="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
 ANDROID_ENVS=("ANDROID_HOME" "ANDROID_NDK_HOME" "android_toolchain_file")
 for ENV in "${ANDROID_ENVS[@]}"; do
     if [ ! -e ${!ENV} ]; then
-        echo "$ENV cannot be found!!"
+        echo "${!ENV} cannot be found!!"
         exit 1
     else
         cmd="export $ENV=${!ENV}"
@@ -15,18 +18,18 @@ for ENV in "${ANDROID_ENVS[@]}"; do
     fi
 done
 
-if [ ! -d $JDK_RO0T_DIR ]; then
-    echo "$JDK_ROOT_DIR cannot be found!"
-    exit 1
-fi
-JDK_DIRS=($(ls -dr /home/eli/DevTools/JDK/jdk-11*))
-if [ "${#JDK_DIRS[@]}" -gt "0" ]; then
-    cmd="export JAVA_HOME=${JDK_DIRS[0]}"
+#if [ ! -d $JDK_RO0T_DIR ]; then
+    #echo "$JDK_ROOT_DIR cannot be found!"
+    #exit 1
+#fi
+JAVA_VERSION="11"
+JDKS=($(ls -dr /lib/jvm/java-$JAVA_VERSION-openjdk-amd64/))
+if [ "${#JDKS[@]}" -lt "1" ]; then
+    cmd="sudo apt install openjdk-$JAVA_VERSION-jdk"
     echo $cmd
     $cmd
-else
-    echo "try to download OpenJDK11U-jdk_x64_linux_hotspot_20XX-MM-DD-HH-MM.tar.gz  at https://github.com/AdoptOpenJDK/openjdk11-binaries/releases"
-    echo "and extract it to $JDK_ROOT_DIR/jdk-11.x.xx+x"
-    exit 1
 fi
-
+cmd="export JAVA_HOME=${JDKS[0]}"
+echo $cmd
+$cmd
+export PATH=$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/tools/bin:$PATH
